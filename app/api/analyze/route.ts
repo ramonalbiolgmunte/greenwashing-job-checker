@@ -4,7 +4,7 @@ import { SYSTEM_PROMPT } from "@/lib/prompt";
 
 // Se ejecuta solo en el servidor: la API key nunca llega al navegador del usuario.
 const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
+  apiKey: process.env.ANTHROPIC_API_KEY?.trim(),
 });
 
 export async function POST(req: NextRequest) {
