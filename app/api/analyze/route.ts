@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { SYSTEM_PROMPT } from "@/lib/prompt";
 
+// Le da a esta función serverless hasta 60s en vez del límite por defecto
+// de Vercel (10s en el plan Hobby), por si el análisis genera una respuesta larga.
+export const maxDuration = 60;
+
 // Se ejecuta solo en el servidor: la API key nunca llega al navegador del usuario.
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY?.replace(/\s+/g, ""),
@@ -20,7 +24,7 @@ export async function POST(req: NextRequest) {
 
     const message = await anthropic.messages.create({
       model: "claude-sonnet-5",
-      max_tokens: 2500,
+      max_tokens: 10000,
       system: SYSTEM_PROMPT,
       messages: [{ role: "user", content: jobText }],
     });
@@ -42,8 +46,6 @@ export async function POST(req: NextRequest) {
     try {
       parsed = JSON.parse(cleaned);
     } catch (parseErr) {
-      // Log de diagnóstico: mostramos el fragmento exacto de texto donde
-      // falla el parseo, para poder ver qué está generando el modelo mal.
       const match = /position (\d+)/.exec(String(parseErr));
       const pos = match ? parseInt(match[1], 10) : 0;
       console.error(
