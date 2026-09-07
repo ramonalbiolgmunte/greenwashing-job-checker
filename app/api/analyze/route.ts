@@ -30,9 +30,15 @@ export async function POST(req: NextRequest) {
       throw new Error("Respuesta inesperada del modelo.");
     }
 
-    // El modelo devuelve JSON como texto; lo parseamos aquí para validarlo
-    // antes de enviarlo al cliente.
-    const parsed = JSON.parse(textBlock.text);
+    // El modelo debería devolver JSON puro, pero por robustez limpiamos
+    // posibles envoltorios de markdown (```json ... ```) y comas sobrantes
+    // antes de la última llave/corchete de un objeto o array, que a veces
+    // aparecen en respuestas largas y rompen JSON.parse.
+    let cleaned = textBlock.text.trim();
+    cleaned = cleaned.replace(/^```(?:json)?\s*/i, "").replace(/```\s*$/i, "");
+    cleaned = cleaned.replace(/,(\s*[}\]])/g, "$1");
+
+    const parsed = JSON.parse(cleaned);
 
     return NextResponse.json(parsed);
   } catch (err) {
