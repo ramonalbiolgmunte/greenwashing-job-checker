@@ -45,6 +45,12 @@ El score_global no es un promedio simple; las dimensiones 2 y 4 (requisitos téc
 y naturaleza de funciones) deben pesar más que 1 y 3 en tu juicio, porque son las
 señales más difíciles de fingir en el texto de una oferta.
 
+El nivel_riesgo debe derivarse SIEMPRE del score_global de forma consistente,
+usando esta correspondencia exacta (nunca la contradigas):
+- score_global 4 o 5 → nivel_riesgo "bajo"
+- score_global 3 → nivel_riesgo "medio"
+- score_global 1 o 2 → nivel_riesgo "alto"
+
 Responde ÚNICAMENTE con un objeto JSON válido, sin texto adicional antes o después,
 sin bloques de código markdown, con esta forma exacta:
 
