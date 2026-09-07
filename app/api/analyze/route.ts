@@ -38,7 +38,21 @@ export async function POST(req: NextRequest) {
     cleaned = cleaned.replace(/^```(?:json)?\s*/i, "").replace(/```\s*$/i, "");
     cleaned = cleaned.replace(/,(\s*[}\]])/g, "$1");
 
-    const parsed = JSON.parse(cleaned);
+    let parsed;
+    try {
+      parsed = JSON.parse(cleaned);
+    } catch (parseErr) {
+      // Log de diagnóstico: mostramos el fragmento exacto de texto donde
+      // falla el parseo, para poder ver qué está generando el modelo mal.
+      const match = /position (\d+)/.exec(String(parseErr));
+      const pos = match ? parseInt(match[1], 10) : 0;
+      console.error(
+        "JSON malformado. Fragmento alrededor del error:",
+        cleaned.slice(Math.max(0, pos - 80), pos + 80)
+      );
+      console.error("Texto completo devuelto por el modelo:", cleaned);
+      throw parseErr;
+    }
 
     return NextResponse.json(parsed);
   } catch (err) {
